@@ -11,7 +11,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     volumes:
-      - static:/app/result_build/
+      - ./frontend/:/app/result_build/
   nginx:
     image: nginx:1.19.3
     ports:
@@ -29,4 +29,4 @@ services:
     env_file: .env
     volumes:
       - static:/backend/
-      - pg_data:/app/bd/
+      - pg_data:/app/
