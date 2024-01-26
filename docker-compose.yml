@@ -29,4 +29,4 @@ services:
     env_file: .env
     volumes:
       - static:/backend/
-      - venv:/usr/local/lib/python3.9/
+      - venv:/usr/

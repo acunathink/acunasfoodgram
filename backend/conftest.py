@@ -1,5 +1,6 @@
-import pytest
 from django.test.client import Client
+
+import pytest
 
 
 @pytest.fixture
@@ -11,6 +12,7 @@ def some_one(django_user_model):
         last_name='Пупкин',
         password='Qwerty123'
     )
+
 
 @pytest.fixture
 def some_one_client(some_one):
