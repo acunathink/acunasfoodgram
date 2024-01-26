@@ -1,7 +1,6 @@
 """Foodgram api URL Configuration.
 """
-from django.conf.urls import url
-from django.urls import include, path
+from django.urls import include, path, re_path
 
 from rest_framework import routers
 
@@ -12,6 +11,6 @@ api_router.register(r'tags', TagViewSet)
 
 urlpatterns = [
     path('', include('djoser.urls')),
-    url(r'', include(api_router.urls)),
+    re_path(r'', include(api_router.urls)),
     path('auth/', include('djoser.urls.authtoken')),
 ]
