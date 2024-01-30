@@ -1,8 +1,9 @@
 from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly
 from rest_framework.viewsets import ReadOnlyModelViewSet
 
-from recipes.models import Ingredient, Tag
-from .serializers import IngredientSerializer, TagSerializer
+from api.serializers import IngredientSerializer, TagSerializer
+from recipes.models import Ingredient, Recipe, Tag
+from recipes.serializers import RecipeSerializer
 
 
 class TagViewSet(ReadOnlyModelViewSet):
@@ -12,8 +13,14 @@ class TagViewSet(ReadOnlyModelViewSet):
     pagination_class = None
 
 
-class ingredientViewSet(ReadOnlyModelViewSet):
+class IngredientViewSet(ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
     serializer_class = IngredientSerializer
     pagination_class = None
+
+
+class RecipeViewSet(ReadOnlyModelViewSet):
+    queryset = Recipe.objects.all()
+    permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
+    serializer_class = RecipeSerializer
