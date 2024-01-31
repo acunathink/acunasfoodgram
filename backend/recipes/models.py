@@ -53,20 +53,21 @@ class Recipe(models.Model):
         verbose_name='Название',
         max_length=144,
         unique=True
-    ),
+    )
     text = models.CharField(
         verbose_name='Описание',
         max_length=4096
-    ),
+    )
     cooking_time = models.IntegerField(
         verbose_name='Время приготовления в минутах',
-    ),
+        default=0
+    )
     created = models.DateTimeField(auto_now_add=True)
     image = models.ImageField(
         upload_to='images/',
         null=True,
         default=None
-    ),
+    )
     author = models.ForeignKey(
         User, related_name='ricipes',
         on_delete=models.CASCADE
@@ -77,6 +78,9 @@ class Recipe(models.Model):
     tags = models.ManyToManyField(
         Tag, through='RecipeTags'
     )
+
+    def __str__(self) -> str:
+        return self.name
 
     class Meta:
         verbose_name = 'Рецепт'

@@ -4,9 +4,10 @@ from django.core.files.base import ContentFile
 
 from rest_framework import serializers
 
-from api.serializers import IngredientSerializer, TagSerializer
+# from api.serializers import IngredientSerializer, TagSerializer
 from recipes.models import Recipe
-from users.serializers import CustomUserSerializer
+
+# from users.serializers import CustomUserSerializer
 
 
 class Base64ImageField(serializers.ImageField):
@@ -21,20 +22,7 @@ class Base64ImageField(serializers.ImageField):
 
 
 class RecipeSerializer(serializers.ModelSerializer):
-    ingredients = IngredientSerializer(many=True, read_only=True)
-    tags = TagSerializer(many=True, read_only=True)
-    author = CustomUserSerializer(read_only=True)
-    image = Base64ImageField(read_only=True)
 
     class Meta:
         model = Recipe
-        fields = (
-            'id',
-            'tags',
-            'author',
-            'ingredients',
-            'name',
-            'image',
-            'text',
-            'cooking_time'
-        )
+        fields = '__all__'
