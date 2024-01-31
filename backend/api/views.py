@@ -3,7 +3,7 @@ from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 from api.serializers import IngredientSerializer, TagSerializer
 from recipes.models import Ingredient, Recipe, Tag
-from recipes.serializers import RecipeSerializer
+from recipes.serializers import RecipeCreateSerializer, RecipeSerializer
 
 
 class TagViewSet(ReadOnlyModelViewSet):
@@ -22,5 +22,13 @@ class IngredientViewSet(ReadOnlyModelViewSet):
 
 class RecipeViewSet(ModelViewSet):
     permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
-    serializer_class = RecipeSerializer
     queryset = Recipe.objects.all()
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
+    def get_serializer_class(self):
+        if self.action in ('create',):
+            return RecipeCreateSerializer
+
+        return RecipeSerializer
