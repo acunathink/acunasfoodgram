@@ -21,7 +21,7 @@ class Tag(models.Model):
     )
 
     def __str__(self) -> str:
-        return self.name
+        return self.slug
 
     class Meta:
         verbose_name = 'тэг'
@@ -52,31 +52,39 @@ class Recipe(models.Model):
     name = models.CharField(
         verbose_name='Название',
         max_length=144,
-        unique=True
+        unique=True,
+        null=False,
+        blank=False
     )
     text = models.CharField(
         verbose_name='Описание',
-        max_length=4096
+        max_length=4096,
+        null=False,
+        blank=False
     )
     cooking_time = models.IntegerField(
         verbose_name='Время приготовления в минутах',
-        default=0
+        default=0,
+        null=False,
+        blank=False
     )
     created = models.DateTimeField(auto_now_add=True)
     image = models.ImageField(
         upload_to='images/',
-        null=True,
-        default=None
+        null=False,
+        blank=False
     )
     author = models.ForeignKey(
         User, related_name='ricipes',
         on_delete=models.CASCADE
     )
     ingredients = models.ManyToManyField(
-        Ingredient, through='RecipeIngredients'
+        Ingredient, through='RecipeIngredients',
+        blank=False
     )
     tags = models.ManyToManyField(
-        Tag, through='RecipeTags'
+        Tag, through='RecipeTags',
+        blank=False
     )
 
     def __str__(self) -> str:
