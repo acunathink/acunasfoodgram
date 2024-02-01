@@ -22,7 +22,7 @@ jobs:
       run: python -m flake8 backend/
 
     - name: Test with pytest
-      run: pytest
+      run: cd backend/ && pytest
 
   send_message:
     runs-on: ubuntu-latest

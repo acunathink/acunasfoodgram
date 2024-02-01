@@ -3,6 +3,7 @@ version: '3.3'
 volumes:
   static:
   venv:
+  media:
 
 services:
 
@@ -21,6 +22,7 @@ services:
       - ./frontend/build:/usr/share/nginx/html/
       - ./docs/:/usr/share/nginx/html/api/docs/
       - static:/backend/
+      - media:/media/
 
   backend:
     build:
@@ -30,3 +32,4 @@ services:
     volumes:
       - static:/backend/
       - venv:/usr/
+      - media:/app/media/

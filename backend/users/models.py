@@ -1,10 +1,13 @@
 from django.contrib.auth.models import AbstractUser
-
-# from django.db import models
+from django.db import models
 
 
 class User(AbstractUser):
-    pass
+    first_name = models.CharField('Имя', max_length=144, blank=False)
+    last_name = models.CharField('Фамилия', max_length=144, blank=False)
+    email = models.EmailField(
+        'Адрес почты', max_length=144, blank=False, unique=True
+    )
 
     class Meta:
         verbose_name = 'Пользователь'
