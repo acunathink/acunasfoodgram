@@ -60,6 +60,13 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = '__all__'
 
+    def validate(self, attrs):
+        ingredients = attrs['ingredients']
+        if len(ingredients) < 1:
+            raise serializers.ValidationError(
+                'ingredients: Это поле не может быть пустым.')
+        return super().validate(attrs)
+
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
