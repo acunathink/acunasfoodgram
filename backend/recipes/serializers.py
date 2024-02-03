@@ -1,5 +1,4 @@
 import base64
-from typing import Any
 
 from django.core.files.base import ContentFile
 from django.shortcuts import get_object_or_404
@@ -104,10 +103,9 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 class AuthorFromKwargs:
     requires_context = True
 
-    def __call__(self, serializer_field) -> Any:
+    def __call__(self, serializer_field):
         view = serializer_field.context.get('view')
         author_id = view.kwargs.get('author_id')
-        print(f'--here: \t {get_object_or_404(User, pk=author_id)}')
         return get_object_or_404(User, pk=author_id)
 
 
@@ -131,12 +129,6 @@ class SubscriberSerializer(serializers.ModelSerializer):
                 message="Повторно подписаться нельзя."
             )
         ]
-
-    # def to_representation(self, instance):
-    #     print(f'-- instance: {instance}')
-    #     # return instance
-    #     return {}
-    #     return super().to_representation(instance)
 
     def validate(self, attrs):
         request = self.context['request']

@@ -122,8 +122,7 @@ class Subscriber(models.Model):
         User, on_delete=models.CASCADE, related_name='subscription')
 
     class Meta:
-        verbose_name = 'Подписки'
-        verbose_name_plural = 'Подписки'
+        ordering = ('author', )
         constraints = [
             models.UniqueConstraint(
                 fields=['author', 'subscribe'],

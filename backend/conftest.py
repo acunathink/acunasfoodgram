@@ -25,6 +25,17 @@ def some_one(django_user_model):
 
 
 @pytest.fixture
+def somebody(django_user_model):
+    return django_user_model.objects.create(
+        email='somebody@example.com',
+        username='somebody',
+        first_name='Петя',
+        last_name='Губкин',
+        password='Qwerty123'
+    )
+
+
+@pytest.fixture
 def some_one_client(some_one):
     token, _ = Token.objects.get_or_create(user=some_one)
     client = APIClient()

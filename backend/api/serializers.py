@@ -18,9 +18,6 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 
 class RecipeTagSerializer(serializers.ModelSerializer):
-    # slug = serializers.SlugRelatedField(
-    #     slug_field='tag.slug', queryset=Tag.objects.all()
-    # )
     color = serializers.StringRelatedField(source='tag.color', read_only=True)
     name = serializers.StringRelatedField(source='tag.name')
     id = serializers.PrimaryKeyRelatedField(source='tag.id', read_only=True)

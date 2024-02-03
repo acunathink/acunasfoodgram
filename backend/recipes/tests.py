@@ -60,3 +60,11 @@ def test_ingredients_create(admin_user):
             Ingredient(name='Перец', measurement_unit='г'),
         ]
     )
+
+
+def test_subscribe_someone(somebody, some_one_client):
+    response1 = some_one_client.post('/api/users/1/subscribe/')
+    assert response1.status_code == HTTPStatus.CREATED
+
+    response2 = some_one_client.get('/api/users/subscriptions/')
+    assert response2.status_code == HTTPStatus.OK

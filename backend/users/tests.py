@@ -9,10 +9,10 @@ import pytest
     (
         ('/api/users/', HTTPStatus.OK),
         ('/api/users/me/', HTTPStatus.UNAUTHORIZED),
-        ('/api/users/1/', HTTPStatus.UNAUTHORIZED),
+        ('/api/users/1/', HTTPStatus.OK),
     ),
 )
-def test_anon_users_get(db, client, url, expected_status):
+def test_anon_users_get(some_one, client, url, expected_status):
     response = client.get(url)
     assert response.status_code == expected_status
 
