@@ -113,3 +113,20 @@ class RecipeTags(models.Model):
 
     def __str__(self):
         return f'{self.recipe} {self.tag}'
+
+
+class Subscriber(models.Model):
+    author = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='subscribe')
+    subscribe = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='subscription')
+
+    class Meta:
+        verbose_name = 'Подписки'
+        verbose_name_plural = 'Подписки'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['author', 'subscribe'],
+                name='once_subscribe'
+            )
+        ]

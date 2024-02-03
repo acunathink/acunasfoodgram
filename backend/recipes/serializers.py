@@ -1,12 +1,15 @@
 import base64
+from typing import Any
 
 from django.core.files.base import ContentFile
+from django.shortcuts import get_object_or_404
 
 from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator
 
 from api.serializers import (IngredientSerializer, RecipeIngredientSerializer,
                              RecipeTagSerializer, TagSerializer)
-from recipes.models import Recipe, Tag
+from recipes.models import Recipe, Subscriber, Tag, User
 from users.serializers import CustomUserSerializer
 from .models import RecipeIngredients, RecipeTags
 
@@ -96,3 +99,48 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             RecipeTags.objects.filter(recipe=instance).all(), many=True
         ).data
         return representation
+
+
+class AuthorFromKwargs:
+    requires_context = True
+
+    def __call__(self, serializer_field) -> Any:
+        view = serializer_field.context.get('view')
+        author_id = view.kwargs.get('author_id')
+        print(f'--here: \t {get_object_or_404(User, pk=author_id)}')
+        return get_object_or_404(User, pk=author_id)
+
+
+class SubscriberSerializer(serializers.ModelSerializer):
+    subscribe = serializers.PrimaryKeyRelatedField(
+        default=serializers.CurrentUserDefault(),
+        queryset=User.objects
+    )
+    author = serializers.PrimaryKeyRelatedField(
+        default=AuthorFromKwargs(),
+        queryset=User.objects
+    )
+
+    class Meta:
+        model = Subscriber
+        fields = ('author', 'subscribe')
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Subscriber.objects.all(),
+                fields=('author', 'subscribe'),
+                message="Повторно подписаться нельзя."
+            )
+        ]
+
+    # def to_representation(self, instance):
+    #     print(f'-- instance: {instance}')
+    #     # return instance
+    #     return {}
+    #     return super().to_representation(instance)
+
+    def validate(self, attrs):
+        request = self.context['request']
+        subscriber = attrs.get('author')
+        if request.user == subscriber:
+            raise serializers.ValidationError("На себя подписаться нельзя.")
+        return super().validate(attrs)
