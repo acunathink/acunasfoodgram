@@ -117,11 +117,11 @@ class RecipeSubscriptionSerializer(serializers.ModelSerializer):
 
 
 class SubscriptionsSerializer(serializers.ModelSerializer):
-    recipes = RecipeSubscriptionSerializer(many=True, read_only=True)
+    author = CustomUserSerializer(read_only=True)
 
     class Meta:
         model = Subscriber
-        fields = '__all__'
+        fields = 'author',
 
 
 class SubscriberSerializer(serializers.ModelSerializer):
