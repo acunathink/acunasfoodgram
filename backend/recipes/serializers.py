@@ -109,6 +109,21 @@ class AuthorFromKwargs:
         return get_object_or_404(User, pk=author_id)
 
 
+class RecipeSubscriptionSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Recipe
+        fields = 'id', 'name', 'image', 'cooking_time'
+
+
+class SubscriptionsSerializer(serializers.ModelSerializer):
+    recipes = RecipeSubscriptionSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Subscriber
+        fields = '__all__'
+
+
 class SubscriberSerializer(serializers.ModelSerializer):
     subscribe = serializers.PrimaryKeyRelatedField(
         default=serializers.CurrentUserDefault(),
