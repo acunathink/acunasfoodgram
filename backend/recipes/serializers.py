@@ -60,7 +60,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = '__all__'
+        exclude = ['created']
 
     def validate(self, attrs):
         ingredients = attrs['ingredients']
@@ -113,7 +113,7 @@ class RecipeSubscriptionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = 'id', 'name', 'image', 'cooking_time'
+        fields = 'id', 'name', 'image', 'cooking_time', 'amount'
 
 
 class SubscriptionsSerializer(serializers.ModelSerializer):

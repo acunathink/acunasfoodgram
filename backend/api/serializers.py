@@ -11,10 +11,17 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class IngredientSerializer(serializers.ModelSerializer):
+    amount = serializers.SerializerMethodField()
 
     class Meta:
         model = Ingredient
-        fields = '__all__'
+        fields = 'id', 'name', 'amount', 'measurement_unit'
+
+    def get_amount(self, ingredient):
+        recipe_ingredient = RecipeIngredients.objects.get(
+            recipe=self.parent.root.instance, ingredient=ingredient
+        )
+        return recipe_ingredient.amount
 
 
 class RecipeTagSerializer(serializers.ModelSerializer):

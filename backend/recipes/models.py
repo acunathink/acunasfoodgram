@@ -97,8 +97,10 @@ class Recipe(models.Model):
 
 
 class RecipeIngredients(models.Model):
-    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    ingredient = models.ForeignKey(
+        Ingredient, on_delete=models.CASCADE, related_name='recipes')
+    recipe = models.ForeignKey(
+        Recipe, on_delete=models.CASCADE)
     amount = models.SmallIntegerField(
         null=False,
     )
