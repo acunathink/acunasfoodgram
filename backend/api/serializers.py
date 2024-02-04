@@ -11,17 +11,34 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class IngredientSerializer(serializers.ModelSerializer):
-    amount = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Ingredient
+        fields = 'id', 'name', 'measurement_unit'
+
+
+class IngredientRecipeSerializer(serializers.ModelSerializer):
+    amount = serializers.PrimaryKeyRelatedField(
+        source='recipes.amount', read_only=True
+    )
 
     class Meta:
         model = Ingredient
         fields = 'id', 'name', 'amount', 'measurement_unit'
 
-    def get_amount(self, ingredient):
-        recipe_ingredient = RecipeIngredients.objects.get(
-            recipe=self.parent.root.instance, ingredient=ingredient
-        )
-        return recipe_ingredient.amount
+
+# class IngredientRecipeSerializer(serializers.ModelSerializer):
+#     amount = serializers.SerializerMethodField()
+
+#     class Meta:
+#         model = Ingredient
+#         fields = 'id', 'name', 'amount', 'measurement_unit'
+
+#     def get_amount(self, ingredient):
+#         recipe_ingredient = RecipeIngredients.objects.get(
+#             recipe=self.parent.root.instance, ingredient=ingredient
+#         )
+#         return recipe_ingredient.amount
 
 
 class RecipeTagSerializer(serializers.ModelSerializer):

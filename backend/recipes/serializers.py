@@ -6,11 +6,12 @@ from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
-from api.serializers import (IngredientSerializer, RecipeIngredientSerializer,
-                             RecipeTagSerializer, TagSerializer)
-from recipes.models import Recipe, Subscriber, Tag, User
+from api.serializers import (IngredientRecipeSerializer,
+                             RecipeIngredientSerializer, RecipeTagSerializer,
+                             TagSerializer)
+from recipes.models import (Recipe, RecipeIngredients, RecipeTags, Subscriber,
+                            Tag, User)
 from users.serializers import CustomUserSerializer
-from .models import RecipeIngredients, RecipeTags
 
 
 class Base64ImageField(serializers.ImageField):
@@ -26,7 +27,7 @@ class Base64ImageField(serializers.ImageField):
 
 class RecipeSerializer(serializers.ModelSerializer):
     image = Base64ImageField()
-    ingredients = IngredientSerializer(many=True, read_only=True)
+    ingredients = IngredientRecipeSerializer(many=True)
     tags = TagSerializer(many=True, read_only=True)
     author = CustomUserSerializer(read_only=True)
 
