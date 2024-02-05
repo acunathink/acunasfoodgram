@@ -18,27 +18,16 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 
 class IngredientRecipeSerializer(serializers.ModelSerializer):
-    amount = serializers.PrimaryKeyRelatedField(
-        source='recipes.amount', read_only=True
-    )
+    id = serializers.PrimaryKeyRelatedField(
+        source='ingredient', read_only=True)
+    name = serializers.CharField(
+        source='ingredient.name', read_only=True)
+    measurement_unit = serializers.CharField(
+        source='ingredient.measurement_unit', read_only=True)
 
     class Meta:
-        model = Ingredient
+        model = RecipeIngredients
         fields = 'id', 'name', 'amount', 'measurement_unit'
-
-
-# class IngredientRecipeSerializer(serializers.ModelSerializer):
-#     amount = serializers.SerializerMethodField()
-
-#     class Meta:
-#         model = Ingredient
-#         fields = 'id', 'name', 'amount', 'measurement_unit'
-
-#     def get_amount(self, ingredient):
-#         recipe_ingredient = RecipeIngredients.objects.get(
-#             recipe=self.parent.root.instance, ingredient=ingredient
-#         )
-#         return recipe_ingredient.amount
 
 
 class RecipeTagSerializer(serializers.ModelSerializer):

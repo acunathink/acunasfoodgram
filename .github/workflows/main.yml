@@ -37,4 +37,4 @@ jobs:
         message: |
           Протестирован новый коммит в ветку
           [${{github.ref}}](https://github.com/${{github.repository}}/commit/${{github.sha}})
-          by ${{github.actor}} - "${{github.event.commits[-1].message}}"
+          by ${{github.actor}} - "${{github.event.commits[0].message}}"

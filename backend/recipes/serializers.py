@@ -27,8 +27,10 @@ class Base64ImageField(serializers.ImageField):
 
 class RecipeSerializer(serializers.ModelSerializer):
     image = Base64ImageField()
-    ingredients = IngredientRecipeSerializer(many=True)
-    tags = TagSerializer(many=True, read_only=True)
+    ingredients = IngredientRecipeSerializer(
+        many=True, read_only=True, source='ingredient')
+    tags = TagSerializer(
+        many=True, read_only=True)
     author = CustomUserSerializer(read_only=True)
 
     class Meta:
