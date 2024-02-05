@@ -1,7 +1,7 @@
 from django_filters import CharFilter
 from django_filters import rest_framework as filter
+from rest_framework import permissions
 from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 from api.serializers import IngredientSerializer, TagSerializer
@@ -11,14 +11,14 @@ from recipes.serializers import RecipeCreateSerializer, RecipeSerializer
 
 class TagViewSet(ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     serializer_class = TagSerializer
     pagination_class = None
 
 
 class IngredientViewSet(ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     serializer_class = IngredientSerializer
     pagination_class = None
 
@@ -35,7 +35,7 @@ class RecipeFilter(filter.FilterSet):
 
 
 class RecipeViewSet(ModelViewSet):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     queryset = Recipe.objects.all()
     pagination_class = LimitOffsetPagination
     filterset_class = RecipeFilter
@@ -48,3 +48,10 @@ class RecipeViewSet(ModelViewSet):
             return RecipeCreateSerializer
 
         return RecipeSerializer
+
+    def get_permissions(self):
+        if self.action == 'destroy':
+            permission_classes = [permissions.IsAdminUser]
+        else:
+            permission_classes = [permissions.IsAuthenticated]
+        return [permission() for permission in permission_classes]
