@@ -8,12 +8,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
-from api.serializers import (IngredientRecipeSerializer, IngredientSerializer,
-                             TagSerializer)
+from api.serializers import IngredientSerializer, TagSerializer
 from recipes.models import Ingredient, Recipe, ShoppingCart, Tag
 from recipes.serializers import (RecipeCreateSerializer, RecipeSerializer,
                                  ShoppingCartSerializer)
-from users.models import User
 
 
 class TagViewSet(ReadOnlyModelViewSet):
@@ -67,27 +65,34 @@ class RecipeViewSet(ModelViewSet):
 
 
 class APIRecipeCard(APIView):
+    ID = 'ingredient__ingredient__id'
+    NAME = 'ingredient__ingredient__name'
+    MEASURE = 'ingredient__ingredient__measurement_unit'
+    AMOUNT = 'ingredient__amount'
+
     def get(self, request):
         if request._user.is_authenticated:
-            user: User = request.user
-            ingredients_list = Ingredient.objects.values(
-                'id', 'name', 'measurement_unit', 'recipes__amount', 'recipes__recipe'
-            ).filter(recipes__recipe__shoppers__user=user)
-            shop_list = {}
-            for ingredient in ingredients_list:
-                print(ingredient)
-                if ingredient['id'] not in shop_list:
-                    shop_list[ingredient['id']] = ingredient
-                else:
-                    shop_ingredient = shop_list[ingredient['id']]
-                    shop_ingredient['recipes__amount'] += ingredient['recipes__amount']
-                    shop_list[ingredient['id']] = shop_ingredient
-
-            # serializer = IngredientRecipeSerializer(
-            #     data=ingredients_list, many=True)
-            # if serializer.is_valid():
+            ingredients_list = Recipe.objects.values(
+                self.ID, self.NAME, self.MEASURE, self.AMOUNT).filter(
+                shoppers__user=request.user
+            )
+            shop_list = self.summ_amount(ingredients_list)
             return Response(shop_list, status=status.HTTP_200_OK)
         return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+    def summ_amount(self, obj_dict):
+        summ_list = {}
+        for obj in obj_dict:
+            if obj[self.ID] not in summ_list:
+                summ_list[obj[self.ID]] = obj
+            else:
+                summ_list[obj[self.ID]][self.AMOUNT] += obj[self.AMOUNT]
+        shop_cart = [
+            ''.join((row[self.NAME], ': ',
+                     str(row[self.AMOUNT]), row[self.MEASURE]))
+            for row in summ_list.values()
+        ]
+        return shop_cart
 
     def post(self, request, id):
         if request._user.is_anonymous:
