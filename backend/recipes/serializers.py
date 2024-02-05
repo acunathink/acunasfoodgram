@@ -9,8 +9,8 @@ from rest_framework.validators import UniqueTogetherValidator
 from api.serializers import (IngredientRecipeSerializer,
                              RecipeIngredientSerializer, RecipeTagSerializer,
                              TagSerializer)
-from recipes.models import (Recipe, RecipeIngredients, RecipeTags, Subscriber,
-                            Tag, User)
+from recipes.models import (Recipe, RecipeIngredients, RecipeTags,
+                            ShoppingCart, Subscriber, Tag, User)
 from users.serializers import CustomUserSerializer
 
 
@@ -116,7 +116,7 @@ class RecipeSubscriptionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = 'id', 'name', 'image', 'cooking_time', 'amount'
+        fields = 'id', 'name', 'image', 'cooking_time'
 
 
 class SubscriptionsSerializer(serializers.ModelSerializer):
@@ -154,3 +154,24 @@ class SubscriberSerializer(serializers.ModelSerializer):
         if request.user == subscriber:
             raise serializers.ValidationError("На себя подписаться нельзя.")
         return super().validate(attrs)
+
+
+class ShoppingCartSerializer(serializers.ModelSerializer):
+    # name = serializers.StringRelatedField(source=)
+
+    class Meta:
+        model = ShoppingCart
+        fields = '__all__'
+        # fields = (
+        #     'id',
+        #     'shop_it__name',
+        #     'shop_it__image',
+        #     'shop_it__cooking_time'
+        # )
+        validators = [
+            UniqueTogetherValidator(
+                queryset=ShoppingCart.objects.all(),
+                fields=('user', 'shop_it'),
+                message="Рецепт уже в корзине."
+            )
+        ]

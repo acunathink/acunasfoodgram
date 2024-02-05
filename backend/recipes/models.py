@@ -131,3 +131,18 @@ class Subscriber(models.Model):
                 name='once_subscribe'
             )
         ]
+
+
+class ShoppingCart(models.Model):
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='cart')
+    shop_it = models.ForeignKey(
+        Recipe, on_delete=models.CASCADE, related_name='shoppers')
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'shop_it'],
+                name='once_shop_it'
+            )
+        ]
