@@ -76,8 +76,8 @@ class APIRecipeCard(APIView):
                 self.ID, self.NAME, self.MEASURE, self.AMOUNT).filter(
                 shoppers__user=request.user
             )
-            shop_list = self.summ_amount(ingredients_list)
-            return Response(shop_list, status=status.HTTP_200_OK)
+            shopping_cart = self.summ_amount(ingredients_list)
+            return Response(shopping_cart, status=status.HTTP_200_OK)
         return Response(status=status.HTTP_401_UNAUTHORIZED)
 
     def summ_amount(self, obj_dict):
@@ -87,12 +87,10 @@ class APIRecipeCard(APIView):
                 summ_list[obj[self.ID]] = obj
             else:
                 summ_list[obj[self.ID]][self.AMOUNT] += obj[self.AMOUNT]
-        shop_cart = [
-            ''.join((row[self.NAME], ': ',
-                     str(row[self.AMOUNT]), row[self.MEASURE]))
-            for row in summ_list.values()
-        ]
-        return shop_cart
+
+        cart = [{row[self.NAME]: (row[self.AMOUNT], row[self.MEASURE])}
+                for row in summ_list.values()]
+        return {'Список необходимых ингредиентов': cart}
 
     def post(self, request, id):
         if request._user.is_anonymous:

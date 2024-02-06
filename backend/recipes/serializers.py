@@ -32,6 +32,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     tags = TagSerializer(
         many=True, read_only=True)
     author = CustomUserSerializer(read_only=True)
+    is_in_shopping_cart = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipe
@@ -43,13 +44,19 @@ class RecipeSerializer(serializers.ModelSerializer):
             'name',
             'image',
             'text',
-            'cooking_time'
+            'cooking_time',
+            'is_in_shopping_cart'
         )
         read_only_fields = ('author',)
 
-    def validate(self, attrs):
-        print(f'attrs {attrs}')
-        return super().validate(attrs)
+    def get_is_in_shopping_cart(self, recipe: Recipe):
+        if (
+            ShoppingCart.objects.filter(
+                shop_it=recipe, user=self.context['request'].user
+            ).exists()
+        ):
+            return True
+        return False
 
 
 class RecipeCreateSerializer(serializers.ModelSerializer):
