@@ -2,30 +2,49 @@ from django.shortcuts import get_object_or_404
 
 from django_filters import CharFilter
 from django_filters import rest_framework as filter
-from rest_framework import permissions, status
+from rest_framework import mixins, permissions, status, viewsets
+from rest_framework.decorators import action
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 from api.serializers import IngredientSerializer, TagSerializer
-from recipes.models import Ingredient, Recipe, ShoppingCart, Tag
-from recipes.serializers import (RecipeCreateSerializer, RecipeSerializer,
+from recipes.models import (FavoriteRecipe, Ingredient, Recipe, ShoppingCart,
+                            Tag)
+from recipes.serializers import (FavoriteRecipeSerializer,
+                                 RecipeCreateSerializer, RecipeSerializer,
                                  ShoppingCartSerializer)
 
 
-class TagViewSet(ReadOnlyModelViewSet):
+class TagViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     serializer_class = TagSerializer
     pagination_class = None
 
 
-class IngredientViewSet(ReadOnlyModelViewSet):
+class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     serializer_class = IngredientSerializer
     pagination_class = None
+
+
+class FavoriteRecipeViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin,
+                            viewsets.GenericViewSet):
+    http_method_names = 'post', 'delete'
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = FavoriteRecipe.objects.all()
+    serializer_class = FavoriteRecipeSerializer
+    pagination_class = None
+
+    @action(detail=False, methods=['delete'])
+    def delete(self, request, id):
+        recipe = get_object_or_404(Recipe, pk=id)
+        delete_record = FavoriteRecipe.objects.filter(
+            user=request.user, recipe=recipe)
+        delete_record.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class RecipeFilter(filter.FilterSet):
@@ -39,7 +58,7 @@ class RecipeFilter(filter.FilterSet):
         )
 
 
-class RecipeViewSet(ModelViewSet):
+class RecipeViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     queryset = Recipe.objects.all()
     pagination_class = LimitOffsetPagination
@@ -69,6 +88,8 @@ class APIRecipeCard(APIView):
     NAME = 'ingredient__ingredient__name'
     MEASURE = 'ingredient__ingredient__measurement_unit'
     AMOUNT = 'ingredient__amount'
+
+    http_method_names = ['get', 'post', 'delete']
 
     def get(self, request):
         if request._user.is_authenticated:
