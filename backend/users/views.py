@@ -15,6 +15,11 @@ class CustomUserViewSet(UserViewSet):
     pagination_class = LimitOffsetPagination
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
+    def get_permissions(self):
+        if self.action == "me":
+            return [permissions.IsAuthenticated()]
+        return super().get_permissions()
+
 
 class SubscriberViewSet(ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]

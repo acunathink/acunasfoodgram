@@ -131,6 +131,7 @@ DJOSER = {
         # 'user': ['rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'],
         'user_list': ['rest_framework.permissions.AllowAny'],
         'user_create': ['rest_framework.permissions.AllowAny'],
+        'user_delete': ['rest_framework.permissions.IsAuthenticated'],
         'token_create': ['rest_framework.permissions.AllowAny'],
         'token_destroy': ['rest_framework.permissions.IsAuthenticated'],
     },
