@@ -138,11 +138,34 @@ class RecipeSubscriptionSerializer(serializers.ModelSerializer):
 
 
 class SubscriptionsSerializer(serializers.ModelSerializer):
-    author = CustomUserSerializer(read_only=True)
+    email = serializers.PrimaryKeyRelatedField(
+        source='author.email', read_only=True
+    )
+    id = serializers.PrimaryKeyRelatedField(
+        source='author', read_only=True
+    )
+    username = serializers.PrimaryKeyRelatedField(
+        source='author.username', read_only=True
+    )
+    first_name = serializers.CharField(
+        source='author.first_name', read_only=True
+    )
+    last_name = serializers.CharField(
+        source='author.last_name', read_only=True
+    )
+    is_subscribed = serializers.SerializerMethodField()
+    recipes = RecipeSubscriptionSerializer(many=True, source='author.ricipes')
 
     class Meta:
         model = Subscriber
-        fields = 'author',
+        fields = ('email', 'id', 'username', 'first_name', 'last_name',
+                  'is_subscribed', 'recipes')
+
+    def get_is_subscribed(self, subs_obj: Subscriber):
+        # user = self.context['request'].user
+        # if user.is_authenticated:
+        #     return user.subscription.filter(author=subs_obj.author).exists()
+        return True
 
 
 class SubscriberSerializer(serializers.ModelSerializer):
