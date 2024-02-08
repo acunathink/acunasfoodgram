@@ -3,7 +3,6 @@ from http import HTTPStatus
 import pytest
 
 
-@pytest.mark.xfail
 @pytest.mark.parametrize(
     'url, expected_status',
     (

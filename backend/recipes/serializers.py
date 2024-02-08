@@ -86,10 +86,23 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         exclude = ['created']
 
     def validate(self, attrs):
-        ingredients = attrs['ingredients']
+        ingredients: list = attrs['ingredients']
         if len(ingredients) < 1:
             raise serializers.ValidationError(
                 'ingredients: Это поле не может быть пустым.')
+        ingredient_ids = {}
+        duplicates = []
+        for ingredient in ingredients:
+            if ingredient['id'] not in ingredient_ids:
+                ingredient_ids[ingredient['id']] = ingredient
+            else:
+                duplicates.append(ingredient['id'])
+        if len(duplicates) > 0:
+            str_dups = [f'{d.name}(id:{str(d.id)})' for d in duplicates]
+            raise serializers.ValidationError(
+                f"Ингредиенты: {', '.join(str_dups)}"
+                " - повторяются."
+            )
         return super().validate(attrs)
 
     def create(self, validated_data):

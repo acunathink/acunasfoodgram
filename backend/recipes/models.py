@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.core.validators import MinValueValidator
 from django.db import models
 
 User = get_user_model()
@@ -87,6 +88,17 @@ class Recipe(models.Model):
         blank=False
     )
 
+    # def validate(self):
+    #     ingredient_ids = self.ingredients.values_list('id', flat=True)
+    #     duplicate_ids = set(
+    #         x for x in ingredient_ids if ingredient_ids.count(x) > 1
+    #     )
+    #     if duplicate_ids:
+    #         raise ValidationError(
+    #             f"Ингредиенты с ID {', '.join(duplicate_ids)} "
+    #             "уже добавлены в рецепт."
+    #         )
+
     def __str__(self) -> str:
         return self.name
 
@@ -102,7 +114,7 @@ class RecipeIngredients(models.Model):
     recipe = models.ForeignKey(
         Recipe, on_delete=models.CASCADE, related_name='ingredient')
     amount = models.SmallIntegerField(
-        null=False,
+        null=False, validators=[MinValueValidator(1)]
     )
 
     def __str__(self):
