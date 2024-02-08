@@ -2,7 +2,7 @@ from django.shortcuts import get_object_or_404
 
 from django_filters import CharFilter
 from django_filters import rest_framework as filter
-from rest_framework import mixins, permissions, status, viewsets
+from rest_framework import filters, mixins, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
@@ -28,6 +28,8 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     serializer_class = IngredientSerializer
     pagination_class = None
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['^name']
 
 
 class FavoriteRecipeViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin,
