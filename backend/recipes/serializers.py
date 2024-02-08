@@ -54,21 +54,15 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def get_is_in_shopping_cart(self, recipe: Recipe):
         user = self.context['request'].user
-        if user.is_authenticated and (
-            ShoppingCart.objects.filter(
-                shop_it=recipe, user=self.context['request'].user
-            ).exists()
-        ):
+        if (user.is_authenticated and ShoppingCart.objects.filter(
+                shop_it=recipe, user=user).exists()):
             return True
         return False
 
     def get_is_favorited(self, recipe: Recipe):
         user = self.context['request'].user
-        if user.is_authenticated and (
-            FavoriteRecipe.objects.filter(
-                recipe=recipe, user=self.context['request'].user
-            ).exists()
-        ):
+        if (user.is_authenticated and FavoriteRecipe.objects.filter(
+                recipe=recipe, user=user).exists()):
             return True
         return False
 
@@ -81,10 +75,23 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         many=True
     )
     ingredients = RecipeIngredientSerializer(many=True)
+    is_in_shopping_cart = serializers.SerializerMethodField()
+    is_favorited = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipe
-        exclude = ['created']
+        fields = (
+            'id',
+            'tags',
+            'author',
+            'ingredients',
+            'is_favorited',
+            'is_in_shopping_cart',
+            'name',
+            'image',
+            'text',
+            'cooking_time',
+        )
 
     def validate(self, attrs):
         check_list = 'ingredients', 'tags'
@@ -135,6 +142,14 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             RecipeTags.objects.filter(recipe=instance).all(), many=True
         ).data
         return representation
+
+    def get_is_in_shopping_cart(self, recipe: Recipe):
+        return ShoppingCart.objects.filter(
+            shop_it=recipe, user=self.context['request'].user).exists()
+
+    def get_is_favorited(self, recipe: Recipe):
+        return FavoriteRecipe.objects.filter(
+            recipe=recipe, user=self.context['request'].user).exists()
 
 
 class AuthorFromKwargs:
