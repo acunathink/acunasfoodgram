@@ -8,6 +8,7 @@ from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from api.permissions import AauthorOrReadOnly
 from api.serializers import IngredientSerializer, TagSerializer
 from recipes.models import (FavoriteRecipe, Ingredient, Recipe, ShoppingCart,
                             Tag)
@@ -77,7 +78,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action in ['destroy', 'partial_update']:
-            permission_classes = [permissions.IsAdminUser]
+            permission_classes = [AauthorOrReadOnly]
         elif self.action in ['create', 'retrieve', 'list']:
             permission_classes = [permissions.IsAuthenticatedOrReadOnly]
         else:

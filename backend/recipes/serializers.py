@@ -52,7 +52,8 @@ class RecipeSerializer(serializers.ModelSerializer):
         read_only_fields = ('author',)
 
     def get_is_in_shopping_cart(self, recipe: Recipe):
-        if (
+        user = self.context['request'].user
+        if user.is_authenticated and (
             ShoppingCart.objects.filter(
                 shop_it=recipe, user=self.context['request'].user
             ).exists()
@@ -61,7 +62,8 @@ class RecipeSerializer(serializers.ModelSerializer):
         return False
 
     def get_is_favorited(self, recipe: Recipe):
-        if (
+        user = self.context['request'].user
+        if user.is_authenticated and (
             FavoriteRecipe.objects.filter(
                 recipe=recipe, user=self.context['request'].user
             ).exists()
