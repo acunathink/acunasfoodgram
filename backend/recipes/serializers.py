@@ -9,6 +9,7 @@ from rest_framework.validators import UniqueTogetherValidator
 from api.serializers import (IngredientRecipeSerializer,
                              RecipeIngredientSerializer, RecipeTagSerializer,
                              TagSerializer)
+from api.utilities import find_duplicates
 from recipes.models import (FavoriteRecipe, Recipe, RecipeIngredients,
                             RecipeTags, ShoppingCart, Subscriber, Tag, User)
 from users.serializers import CustomUserSerializer
@@ -86,23 +87,23 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         exclude = ['created']
 
     def validate(self, attrs):
-        ingredients: list = attrs['ingredients']
-        if len(ingredients) < 1:
-            raise serializers.ValidationError(
-                'ingredients: Это поле не может быть пустым.')
-        ingredient_ids = {}
-        duplicates = []
-        for ingredient in ingredients:
-            if ingredient['id'] not in ingredient_ids:
-                ingredient_ids[ingredient['id']] = ingredient
-            else:
-                duplicates.append(ingredient['id'])
-        if len(duplicates) > 0:
-            str_dups = [f'{d.name}(id:{str(d.id)})' for d in duplicates]
-            raise serializers.ValidationError(
-                f"Ингредиенты: {', '.join(str_dups)}"
-                " - повторяются."
-            )
+        check_list = 'ingredients', 'tags'
+        for check in check_list:
+            checked_field: list = attrs[check]
+            if len(checked_field) < 1:
+                raise serializers.ValidationError(
+                    f'{check}: Это поле не может быть пустым.')
+            if check == 'ingredients':
+                checked_field = [field['id'] for field in checked_field]
+            duplicates = find_duplicates(checked_field, check)
+            if len(duplicates) > 0:
+                str_dups = [
+                    f'{obj.name}(id:{str(obj.id)})' for obj in duplicates
+                ]
+                raise serializers.ValidationError(
+                    f"{check}: {', '.join(str_dups)}"
+                    " - дублируются в запросе."
+                )
         return super().validate(attrs)
 
     def create(self, validated_data):
