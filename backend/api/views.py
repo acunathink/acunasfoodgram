@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404
 
-from django_filters import CharFilter
+from django_filters import AllValuesMultipleFilter
 from django_filters import rest_framework as filter
 from rest_framework import filters, mixins, permissions, status, viewsets
 from rest_framework.decorators import action
@@ -52,8 +52,8 @@ class FavoriteRecipeViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin,
 
 
 class RecipeFilter(filter.FilterSet):
-    tags = CharFilter(field_name='tags__slug')
-    ingredient = CharFilter(field_name='ingredients__name')
+    tags = AllValuesMultipleFilter(field_name='tags__slug')
+    ingredient = AllValuesMultipleFilter(field_name='ingredients__name')
 
     class Meta:
         model = Recipe
