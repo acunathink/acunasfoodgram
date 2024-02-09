@@ -51,22 +51,31 @@ class FavoriteRecipeViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin,
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class RecipeFilter(filter.FilterSet):
+class RecipeFieldsFilter(filter.FilterSet):
     tags = AllValuesMultipleFilter(field_name='tags__slug')
     ingredient = AllValuesMultipleFilter(field_name='ingredients__name')
 
     class Meta:
         model = Recipe
-        fields = (
-            'author', 'tags', 'cooking_time', 'ingredient'
-        )
+        fields = ('author', 'tags', 'cooking_time', 'ingredient')
+
+
+class FavoritedRecipeFilter(filters.BaseFilterBackend):
+    def filter_queryset(self, request, queryset, view):
+        if (
+            request.user.is_authenticated
+            and request.query_params.get('is_favorited', '0') == '1'
+        ):
+            queryset = queryset.filter(favored__user=request.user)
+        return queryset
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     queryset = Recipe.objects.all()
     pagination_class = LimitOffsetPagination
-    filterset_class = RecipeFilter
+    filterset_class = RecipeFieldsFilter
+    filter_backends = [FavoritedRecipeFilter,]
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
