@@ -97,7 +97,11 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         check_list = 'ingredients', 'tags'
         for check in check_list:
-            checked_field: list = attrs[check]
+            try:
+                checked_field: list = attrs[check]
+            except KeyError:
+                raise serializers.ValidationError(
+                    f'{check}: Это поле обязательно должно быть.')
             if len(checked_field) < 1:
                 raise serializers.ValidationError(
                     f'{check}: Это поле не может быть пустым.')
