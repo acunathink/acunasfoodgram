@@ -65,9 +65,7 @@ class Recipe(models.Model):
     )
     cooking_time = models.IntegerField(
         verbose_name='Время приготовления в минутах',
-        default=0,
-        null=False,
-        blank=False
+        null=False, validators=[MinValueValidator(1)]
     )
     created = models.DateTimeField(auto_now_add=True)
     image = models.ImageField(
@@ -76,7 +74,7 @@ class Recipe(models.Model):
         blank=False
     )
     author = models.ForeignKey(
-        User, related_name='ricipes',
+        User, related_name='recipes',
         on_delete=models.CASCADE
     )
     ingredients = models.ManyToManyField(
@@ -87,17 +85,6 @@ class Recipe(models.Model):
         Tag, through='RecipeTags',
         blank=False
     )
-
-    # def validate(self):
-    #     ingredient_ids = self.ingredients.values_list('id', flat=True)
-    #     duplicate_ids = set(
-    #         x for x in ingredient_ids if ingredient_ids.count(x) > 1
-    #     )
-    #     if duplicate_ids:
-    #         raise ValidationError(
-    #             f"Ингредиенты с ID {', '.join(duplicate_ids)} "
-    #             "уже добавлены в рецепт."
-    #         )
 
     def __str__(self) -> str:
         return self.name
