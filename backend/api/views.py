@@ -60,13 +60,14 @@ class RecipeFieldsFilter(filter.FilterSet):
         fields = ('author', 'tags', 'cooking_time', 'ingredient')
 
 
-class FavoritedRecipeFilter(filters.BaseFilterBackend):
+class BooleanRecipeFilter(filters.BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
-        if (
-            request.user.is_authenticated
-            and request.query_params.get('is_favorited', '0') == '1'
-        ):
+        if request.user.is_anonymous:
+            return queryset
+        if request.query_params.get('is_favorited', '0') == '1':
             queryset = queryset.filter(favored__user=request.user)
+        if request.query_params.get('is_in_shopping_cart', '0') == '1':
+            queryset = queryset.filter(shoppers__user=request.user)
         return queryset
 
 
@@ -75,7 +76,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     pagination_class = LimitOffsetPagination
     filterset_class = RecipeFieldsFilter
-    filter_backends = [FavoritedRecipeFilter,]
+    filter_backends = [BooleanRecipeFilter,]
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
