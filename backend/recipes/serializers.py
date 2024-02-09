@@ -9,7 +9,8 @@ from rest_framework.validators import UniqueTogetherValidator
 from api.serializers import (IngredientRecipeSerializer,
                              RecipeIngredientSerializer, RecipeTagSerializer,
                              TagSerializer)
-from api.utilities import find_duplicates, get_object_or_validation_error
+from api.utilities import (find_duplicates, get_object_or_validation_error,
+                           update_ingredients, update_tags)
 from recipes.models import (FavoriteRecipe, Recipe, RecipeIngredients,
                             RecipeTags, ShoppingCart, Subscriber, Tag, User)
 from users.serializers import CustomUserSerializer
@@ -135,6 +136,17 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         RecipeIngredients.objects.bulk_create(create_ingredients)
         return recipe
 
+    def update(self, recipe, validated_data):
+        recipe.name = validated_data.get('name', recipe.name)
+        recipe.text = validated_data.get('text', recipe.name)
+        recipe.cooking_time = validated_data.get(
+            'cooking_time', recipe.cooking_time)
+        recipe.image = validated_data.get('image', recipe.image)
+        update_ingredients(recipe, validated_data.get('ingredients', None))
+        update_tags(recipe, validated_data.get('tags', recipe.tags))
+        recipe.save()
+        return recipe
+
     def to_representation(self, instance):
         self.fields.pop('ingredients')
         self.fields.pop('tags')
@@ -191,7 +203,6 @@ class SubscriptionsSerializer(serializers.ModelSerializer):
     is_subscribed = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
     recipes = serializers.SerializerMethodField()
-    recipes = RecipeSubscriptionSerializer(many=True, source='author.recipes')
 
     class Meta:
         model = Subscriber
