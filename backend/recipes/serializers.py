@@ -1,5 +1,6 @@
 import base64
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.base import ContentFile
 from django.shortcuts import get_object_or_404
 
@@ -251,7 +252,11 @@ class RecipeFromKwargs:
 
     def __call__(self, serializer_field):
         view = serializer_field.context.get('view')
-        obj = get_object_or_404(Recipe, pk=view.kwargs.get('id'))
+        try:
+            obj = Recipe.objects.get(pk=view.kwargs.get('id'))
+        except ObjectDoesNotExist as exc:
+            raise serializers.ValidationError(
+                'Неверный ID рецепта.') from exc
         return obj
 
 
