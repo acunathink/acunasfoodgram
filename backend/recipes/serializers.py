@@ -1,6 +1,5 @@
 import base64
 
-from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.base import ContentFile
 from django.shortcuts import get_object_or_404
 
@@ -10,7 +9,7 @@ from rest_framework.validators import UniqueTogetherValidator
 from api.serializers import (IngredientRecipeSerializer,
                              RecipeIngredientSerializer, RecipeTagSerializer,
                              TagSerializer)
-from api.utilities import find_duplicates
+from api.utilities import find_duplicates, get_object_or_validation_error
 from recipes.models import (FavoriteRecipe, Recipe, RecipeIngredients,
                             RecipeTags, ShoppingCart, Subscriber, Tag, User)
 from users.serializers import CustomUserSerializer
@@ -191,6 +190,7 @@ class SubscriptionsSerializer(serializers.ModelSerializer):
     )
     is_subscribed = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
+    recipes = serializers.SerializerMethodField()
     recipes = RecipeSubscriptionSerializer(many=True, source='author.recipes')
 
     class Meta:
@@ -206,6 +206,15 @@ class SubscriptionsSerializer(serializers.ModelSerializer):
 
     def get_recipes_count(self, subs_obj: Subscriber):
         return subs_obj.author.recipes.count()
+
+    def get_recipes(self, subs_obj: Subscriber):
+        recipes = subs_obj.author.recipes.all()
+        request = self.context['request']
+        recipes_limit = request.query_params.get('recipes_limit', None)
+        if recipes_limit:
+            recipes = recipes[:int(recipes_limit)]
+        serializer = RecipeSubscriptionSerializer(recipes, many=True)
+        return serializer.data
 
 
 class SubscriberSerializer(serializers.ModelSerializer):
@@ -256,11 +265,8 @@ class RecipeFromKwargs:
 
     def __call__(self, serializer_field):
         view = serializer_field.context.get('view')
-        try:
-            obj = Recipe.objects.get(pk=view.kwargs.get('id'))
-        except ObjectDoesNotExist as exc:
-            raise serializers.ValidationError(
-                'Неверный ID рецепта.') from exc
+        obj = get_object_or_validation_error(
+            Recipe, view.kwargs.get('id'), 'Неверный ID рецепта.')
         return obj
 
 

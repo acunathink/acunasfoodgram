@@ -44,6 +44,7 @@ class SubscriptionsViewSet(ModelViewSet):
     http_method_names = 'get',
     serializer_class = SubscriptionsSerializer
     queryset = User.objects.all()
+    pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
         return self.request.user.subscription.all()

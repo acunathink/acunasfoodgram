@@ -10,6 +10,7 @@ from rest_framework.views import APIView
 
 from api.permissions import AauthorOrReadOnly
 from api.serializers import IngredientSerializer, TagSerializer
+from api.utilities import get_object_or_validation_error
 from recipes.models import (FavoriteRecipe, Ingredient, Recipe, ShoppingCart,
                             Tag)
 from recipes.serializers import (FavoriteRecipeSerializer,
@@ -118,6 +119,8 @@ class APIRecipeCard(APIView):
     def post(self, request, id):
         if request._user.is_anonymous:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
+        recipe = get_object_or_validation_error(
+            Recipe, id, 'Неверный ID рецепта.')
         recipe = get_object_or_404(Recipe, pk=id)
         request.data['user'] = request.user.id
         request.data['shop_it'] = recipe.id
