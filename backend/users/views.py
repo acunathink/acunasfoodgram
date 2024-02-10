@@ -35,8 +35,12 @@ class SubscriberViewSet(ModelViewSet):
         author = get_object_or_404(User, pk=author_id)
         delete_record = Subscriber.objects.filter(
             subscribe=request.user, author=author)
-        delete_record.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        if len(delete_record):
+            delete_record.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(data={
+            "error_id": 'Такой подписки не существует'},
+            status=status.HTTP_400_BAD_REQUEST)
 
 
 class SubscriptionsViewSet(ModelViewSet):

@@ -229,18 +229,16 @@ class SubscriptionsSerializer(serializers.ModelSerializer):
 
 
 class SubscriberSerializer(serializers.ModelSerializer):
-    subscribe = serializers.PrimaryKeyRelatedField(
-        default=serializers.CurrentUserDefault(),
-        queryset=User.objects
+    subscribe = serializers.HiddenField(
+        default=serializers.CurrentUserDefault()
     )
-    author = serializers.PrimaryKeyRelatedField(
-        default=AuthorFromKwargs(),
-        queryset=User.objects
+    author = serializers.HiddenField(
+        default=AuthorFromKwargs()
     )
 
     class Meta:
         model = Subscriber
-        fields = ('author', 'subscribe')
+        fields = 'author', 'subscribe'
         validators = [
             UniqueTogetherValidator(
                 queryset=Subscriber.objects.all(),
@@ -255,6 +253,11 @@ class SubscriberSerializer(serializers.ModelSerializer):
         if request.user == subscriber:
             raise serializers.ValidationError("На себя подписаться нельзя.")
         return super().validate(attrs)
+
+    def to_representation(self, instance: Subscriber):
+        serializer = SubscriptionsSerializer(instance)
+        serializer.context.update(self.context)
+        return serializer.to_representation(instance)
 
 
 class ShoppingCartSerializer(serializers.ModelSerializer):
