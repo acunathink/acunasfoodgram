@@ -15,6 +15,7 @@ from recipes.models import (FavoriteRecipe, Ingredient, Recipe, ShoppingCart,
                             Tag)
 from recipes.serializers import (FavoriteRecipeSerializer,
                                  RecipeCreateSerializer, RecipeSerializer,
+                                 RecipeSubscriptionSerializer,
                                  ShoppingCartSerializer)
 
 
@@ -128,13 +129,14 @@ class APIRecipeCard(APIView):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         recipe = get_object_or_validation_error(
             Recipe, id, 'Неверный ID рецепта.')
-        recipe = get_object_or_404(Recipe, pk=id)
         request.data['user'] = request.user.id
         request.data['shop_it'] = recipe.id
         serializer = ShoppingCartSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            recipe_serializer = RecipeSubscriptionSerializer(recipe)
+            return Response(
+                recipe_serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, id):
@@ -143,5 +145,9 @@ class APIRecipeCard(APIView):
         recipe = get_object_or_404(Recipe, pk=id)
         delete_record = ShoppingCart.objects.filter(
             user=request.user, shop_it=recipe)
-        delete_record.delete()
-        return Response(None, status.HTTP_204_NO_CONTENT)
+        if len(delete_record):
+            delete_record.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(data={
+            "error_recipe": 'Такой записи в корзине нет.'},
+            status=status.HTTP_400_BAD_REQUEST)
