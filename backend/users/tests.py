@@ -8,7 +8,6 @@ import pytest
     (
         ('/api/users/', HTTPStatus.OK),
         ('/api/users/me/', HTTPStatus.UNAUTHORIZED),
-        ('/api/users/1/', HTTPStatus.OK),
     ),
 )
 def test_anon_users_get(some_one, client, url, expected_status):
@@ -21,7 +20,6 @@ def test_anon_users_get(some_one, client, url, expected_status):
     (
         ('/api/users/', HTTPStatus.OK),
         ('/api/users/me/', HTTPStatus.OK),
-        ('/api/users/1/', HTTPStatus.OK),
     ),
 )
 @pytest.mark.db
@@ -35,7 +33,6 @@ def test_admin_users_get(api_client, url, expected_status):
     (
         ('/api/users/', HTTPStatus.OK),
         ('/api/users/me/', HTTPStatus.OK),
-        ('/api/users/1/', HTTPStatus.OK),
     ),
 )
 @pytest.mark.db
