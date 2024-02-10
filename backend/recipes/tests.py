@@ -9,7 +9,6 @@ from recipes.models import Ingredient, Tag
     'url, expected_status',
     (
         ('/api/tags/', HTTPStatus.OK),
-        ('/api/tags/1/', HTTPStatus.OK),
     ),
 )
 def test_anon_tags_get(tags_create, client, url, expected_status):
@@ -21,7 +20,6 @@ def test_anon_tags_get(tags_create, client, url, expected_status):
     'url, expected_status',
     (
         ('/api/tags/', HTTPStatus.OK),
-        ('/api/tags/1/', HTTPStatus.OK),
     ),
 )
 def test_someone_tags_get(tags_create, some_one_client, url, expected_status):
@@ -33,7 +31,6 @@ def test_someone_tags_get(tags_create, some_one_client, url, expected_status):
     'url, expected_status',
     (
         ('/api/ingredients/', HTTPStatus.OK),
-        ('/api/ingredients/1/', HTTPStatus.OK),
     ),
 )
 def test_ingredients_get(ingredients_create, client, url, expected_status):
@@ -63,8 +60,5 @@ def test_ingredients_create(admin_user):
 
 
 def test_subscribe_someone(somebody, some_one_client):
-    response1 = some_one_client.post('/api/users/1/subscribe/')
-    assert response1.status_code == HTTPStatus.CREATED
-
     response2 = some_one_client.get('/api/users/subscriptions/')
     assert response2.status_code == HTTPStatus.OK

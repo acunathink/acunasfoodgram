@@ -35,12 +35,6 @@ jobs:
       run: cd backend/ && python manage.py migrate
 
     - name: Test with pytest
-      env:
-        POSTGRES_USER: postgres
-        POSTGRES_PASSWORD: postgres
-        POSTGRES_DB: postgres
-        DB_HOST: 127.0.0.1
-        DB_PORT: 5432
       run: cd backend/ && pytest
 
   build_backend_and_push_to_docker_hub:
