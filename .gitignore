@@ -136,3 +136,4 @@ dmypy.json
 
 # backend
 backend/media*
+*.sqlite3

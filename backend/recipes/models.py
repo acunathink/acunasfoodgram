@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.core.validators import MinValueValidator
 from django.db import models
 
 User = get_user_model()
@@ -64,9 +65,7 @@ class Recipe(models.Model):
     )
     cooking_time = models.IntegerField(
         verbose_name='Время приготовления в минутах',
-        default=0,
-        null=False,
-        blank=False
+        null=False, validators=[MinValueValidator(1)]
     )
     created = models.DateTimeField(auto_now_add=True)
     image = models.ImageField(
@@ -75,7 +74,7 @@ class Recipe(models.Model):
         blank=False
     )
     author = models.ForeignKey(
-        User, related_name='ricipes',
+        User, related_name='recipes',
         on_delete=models.CASCADE
     )
     ingredients = models.ManyToManyField(
@@ -102,7 +101,7 @@ class RecipeIngredients(models.Model):
     recipe = models.ForeignKey(
         Recipe, on_delete=models.CASCADE, related_name='ingredient')
     amount = models.SmallIntegerField(
-        null=False,
+        null=False, validators=[MinValueValidator(1)]
     )
 
     def __str__(self):
@@ -144,5 +143,20 @@ class ShoppingCart(models.Model):
             models.UniqueConstraint(
                 fields=['user', 'shop_it'],
                 name='once_shop_it'
+            )
+        ]
+
+
+class FavoriteRecipe(models.Model):
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='favorites')
+    recipe = models.ForeignKey(
+        Recipe, on_delete=models.CASCADE, related_name='favored')
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='once_prefer'
             )
         ]
