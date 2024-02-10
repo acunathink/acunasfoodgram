@@ -1,5 +1,5 @@
-pip install --upgrade pip
-pip install -qqr requirements.txt --no-cache-dir
+# pip install --upgrade pip
+# pip install -qqr requirements.txt --no-cache-dir
 
 python manage.py makemigrations
 python manage.py migrate --no-input
