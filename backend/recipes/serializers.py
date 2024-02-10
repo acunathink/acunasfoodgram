@@ -285,18 +285,16 @@ class RecipeFromKwargs:
 
 
 class FavoriteRecipeSerializer(serializers.ModelSerializer):
-    user = serializers.PrimaryKeyRelatedField(
+    user = serializers.HiddenField(
         default=serializers.CurrentUserDefault(),
-        queryset=User.objects
     )
-    recipe = serializers.PrimaryKeyRelatedField(
+    recipe = serializers.HiddenField(
         default=RecipeFromKwargs(),
-        queryset=FavoriteRecipe.objects
     )
 
     class Meta:
         model = FavoriteRecipe
-        fields = ('user', 'recipe')
+        fields = 'user', 'recipe'
         validators = [
             UniqueTogetherValidator(
                 queryset=FavoriteRecipe.objects.all(),
@@ -304,3 +302,7 @@ class FavoriteRecipeSerializer(serializers.ModelSerializer):
                 message="Рецепт уже в избранном."
             )
         ]
+
+    def to_representation(self, instance):
+        serializer = RecipeSubscriptionSerializer(instance.recipe)
+        return serializer.to_representation(instance.recipe)

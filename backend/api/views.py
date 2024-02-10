@@ -48,8 +48,12 @@ class FavoriteRecipeViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin,
         recipe = get_object_or_404(Recipe, pk=id)
         delete_record = FavoriteRecipe.objects.filter(
             user=request.user, recipe=recipe)
-        delete_record.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        if len(delete_record):
+            delete_record.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(data={
+            "error_recipe": 'Такой записи нет в избранном.'},
+            status=status.HTTP_400_BAD_REQUEST)
 
 
 class RecipeFieldsFilter(filter.FilterSet):
