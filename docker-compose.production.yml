@@ -11,7 +11,7 @@ services:
     image: postgres:13
     env_file: .env
     volumes:
-      - pg_data:/var/lib/postgresql/data
+      - pg_data:/var/lib/postgresql/data/
 
   backend:
     image: acunathink/foodgram_backend
@@ -37,5 +37,5 @@ services:
     volumes:
       - ./frontend/build:/usr/share/nginx/html/
       - ./docs/:/usr/share/nginx/html/api/docs/
-      - static:/static
-      - media:/media
+      - static:/backend/
+      - media:/media/
