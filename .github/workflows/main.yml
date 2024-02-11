@@ -169,5 +169,5 @@ jobs:
         format: markdown
         message: |
           Деплой завершён по коммиту
-          [${{github.ref}}/${{github.sha[:7]}}](https://github.com/${{github.repository}}/commit/${{github.sha}})
+          [${{github.ref}}/${{github.sha}}](https://github.com/${{github.repository}}/commit/${{github.sha}})
           by ${{github.actor}} - "${{github.event.commits[0].message}}"
