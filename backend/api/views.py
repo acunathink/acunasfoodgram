@@ -37,6 +37,10 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 
 class FavoriteRecipeViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin,
                             viewsets.GenericViewSet):
+    """Класс FavoriteRecipeViewSet ограничен двумя методами:
+    доступно только добавление или удаление избранных рецептов,
+    id рецепта извлекается из URL."""
+
     http_method_names = 'post', 'delete'
     permission_classes = [permissions.IsAuthenticated]
     queryset = FavoriteRecipe.objects.all()
@@ -45,6 +49,9 @@ class FavoriteRecipeViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin,
 
     @action(detail=False, methods=['delete'])
     def delete(self, request, id):
+        """Валидируется наличие рецепта,
+        а также наличие его в списке избранных.
+        """
         recipe = get_object_or_404(Recipe, pk=id)
         delete_record = FavoriteRecipe.objects.filter(
             user=request.user, recipe=recipe)
@@ -57,6 +64,9 @@ class FavoriteRecipeViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin,
 
 
 class RecipeFieldsFilter(filter.FilterSet):
+    """Класс RecipeFieldsFilter используется для добавления возможности
+    добавлять к запросам параметры фильтрации и поиска."""
+
     tags = AllValuesMultipleFilter(field_name='tags__slug')
     ingredient = AllValuesMultipleFilter(field_name='ingredients__name')
 
@@ -99,6 +109,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
 
 class APIRecipeCard(APIView):
+    """Класс APIRecipeCard используется для работы со списком покупок.
+    Используются константы для получения ингредиентов из рецептов в корзине.
+    """
+
     ID = 'ingredient__ingredient__id'
     NAME = 'ingredient__ingredient__name'
     MEASURE = 'ingredient__ingredient__measurement_unit'
@@ -158,8 +172,8 @@ class APIRecipeCard(APIView):
 
 
 def page_not_found(request, exception):
-    return render(
-        request=request,
-        template_name='404.html',
-        status=status.HTTP_404_NOT_FOUND
-    )
+    """Обработчик ошибки 404 - отправляет кастомный шаблон
+    с соответствующим статусом.
+    """
+    return render(request=request, template_name='404.html',
+                  status=status.HTTP_404_NOT_FOUND)

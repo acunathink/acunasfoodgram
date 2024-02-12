@@ -22,6 +22,10 @@ class CustomUserViewSet(UserViewSet):
 
 
 class SubscriberViewSet(ModelViewSet):
+    """Класс SubscriberViewSet ограничен двумя методами:
+    доступно только добавление или удаление подписки на автора
+    """
+
     permission_classes = [permissions.IsAuthenticated]
     queryset = Subscriber.objects.all()
     http_method_names = 'post', 'delete'
@@ -44,6 +48,9 @@ class SubscriberViewSet(ModelViewSet):
 
 
 class SubscriptionsViewSet(ModelViewSet):
+    """Возвращает пользователей, на которых подписан текущий пользователь.
+    В выдачу добавляются рецепты."""
+
     permission_classes = [permissions.IsAuthenticated]
     http_method_names = 'get',
     serializer_class = SubscriptionsSerializer
