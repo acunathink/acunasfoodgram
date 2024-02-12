@@ -1,4 +1,4 @@
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 
 from django_filters import AllValuesMultipleFilter
 from django_filters import rest_framework as filter
@@ -155,3 +155,11 @@ class APIRecipeCard(APIView):
         return Response(data={
             "error_recipe": 'Такой записи в корзине нет.'},
             status=status.HTTP_400_BAD_REQUEST)
+
+
+def page_not_found(request, exception):
+    return render(
+        request=request,
+        template_name='404.html',
+        status=status.HTTP_404_NOT_FOUND
+    )
