@@ -27,7 +27,18 @@ cd foodgram-project-react
 
 ### Запуск проекта
 
-    В корневой папке проекта (по умолчанию - `foodgram-project-react`) выполните:
+- В корневой папке проекта (по умолчанию - `foodgram-project-react`) выполните:
 ```
 docker compose -f docker-compose.production.yml up
 ```
+- при отсутствии ошибок можно остановить работу через ^C и запустить в фоновом режиме,
+  используя флаг -d:
+```
+docker compose -f docker-compose.production.yml up -d
+```
+
+- после чего можно создать суперюзера для доступа к адимин-зоне сайта, выполнив
+```
+docker compose -f docker-compose.production.yml exec -it backend python manage.py createsuperuser
+```
+проверьте, пройдя на  http://localhost:8000/admin/
