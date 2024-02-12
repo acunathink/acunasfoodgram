@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+    {% block content %}
+      <div class="container py-5">
+        <h2 class="h2">Это ошибка 404 - Страница не найдена.</h2>
+        <p></p>
+        <h4>Страницы с адресом "{{ request.build_absolute_uri }}" не существует!</h4>
+        <p class="h2"></p>
+        <p class="h6">Что-то не так в запросе увы</p>
+        <p></p>
+        <a class="btn btn-primary" href="https://acunasfoodgram.hopto.org" rel="noopener noreferrer" target="_blank"> вернуться к рецептам</a>
+        <p> </p>
+        <p>А если у вас есть соотвествующий доступ, то можно <a href="https://acunasfoodgram.hopto.org/admin" rel="noopener noreferrer" target="_blank">пройти в админку</a><span class="text-danger"> ♥ </span></p>
+        <p> </p>
+      </div>
+    {% endblock %}
