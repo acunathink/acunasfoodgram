@@ -1,11 +1,10 @@
 from django.shortcuts import get_object_or_404
 
 from djoser.views import UserViewSet
-from rest_framework import permissions, status
+from rest_framework import mixins, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet
 
 from recipes.models import Subscriber, User
 from recipes.serializers import SubscriberSerializer, SubscriptionsSerializer
@@ -21,7 +20,8 @@ class CustomUserViewSet(UserViewSet):
         return super().get_permissions()
 
 
-class SubscriberViewSet(ModelViewSet):
+class SubscriberViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin,
+                        viewsets.GenericViewSet):
     """Класс SubscriberViewSet ограничен двумя методами:
     доступно только добавление или удаление подписки на автора
     """
@@ -38,16 +38,16 @@ class SubscriberViewSet(ModelViewSet):
     def delete(self, request, author_id):
         author = get_object_or_404(User, pk=author_id)
         delete_record = Subscriber.objects.filter(
-            subscribe=request.user, author=author)
-        if len(delete_record):
-            delete_record.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(data={
-            "error_id": 'Такой подписки не существует'},
-            status=status.HTTP_400_BAD_REQUEST)
+            subscribe=request.user, author=author).first()
+        if delete_record is None:
+            return Response(data={
+                "error_id": 'Такой подписки не существует'},
+                status=status.HTTP_400_BAD_REQUEST)
+        delete_record.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class SubscriptionsViewSet(ModelViewSet):
+class SubscriptionsViewSet(viewsets.ModelViewSet):
     """Возвращает пользователей, на которых подписан текущий пользователь.
     В выдачу добавляются рецепты."""
 

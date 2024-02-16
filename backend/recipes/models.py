@@ -2,6 +2,8 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
 from django.db import models
 
+from recipes.managers import RelatedFieldsManager
+
 User = get_user_model()
 
 
@@ -85,6 +87,9 @@ class Recipe(models.Model):
         Tag, through='RecipeTags',
         blank=False
     )
+
+    objects = models.Manager()
+    all_related_fields = RelatedFieldsManager()
 
     def __str__(self) -> str:
         return self.name

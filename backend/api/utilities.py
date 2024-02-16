@@ -1,3 +1,5 @@
+from collections import Counter
+
 from django.core.exceptions import ObjectDoesNotExist
 
 from rest_framework.serializers import ValidationError
@@ -5,15 +7,9 @@ from rest_framework.serializers import ValidationError
 from recipes.models import RecipeIngredients, RecipeTags
 
 
-def find_duplicates(obj_list, field_name):
-    check_ids = {}
-    duplicates = []
-    for check_obj in obj_list:
-        if check_obj.id not in check_ids:
-            check_ids[check_obj.id] = check_obj
-        else:
-            duplicates.append(check_obj)
-    return duplicates
+def find_duplicates(obj_list):
+    return [obj for obj, count in Counter(
+        obj_list).items() if count > 1]
 
 
 def get_object_or_validation_error(model, pk, err_str):

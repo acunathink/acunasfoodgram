@@ -21,7 +21,6 @@ services:
       - media:/app/media/
     depends_on:
       - db
-      - frontend
 
   frontend:
     env_file: .env
@@ -39,5 +38,3 @@ services:
       - ./docs/:/usr/share/nginx/html/api/docs/
       - static:/backend/
       - media:/media/
-    depends_on:
-      - backend

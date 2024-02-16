@@ -8,6 +8,8 @@ class User(AbstractUser):
     email = models.EmailField(
         'Адрес почты', max_length=144, blank=False, unique=True
     )
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username']
 
     class Meta:
         verbose_name = 'Пользователь'

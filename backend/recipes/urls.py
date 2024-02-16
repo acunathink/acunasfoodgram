@@ -7,7 +7,7 @@ from rest_framework.routers import DefaultRouter
 from api.views import APIRecipeCard, FavoriteRecipeViewSet, RecipeViewSet
 
 recipe_router = DefaultRouter()
-recipe_router.register(r'', RecipeViewSet)
+recipe_router.register(r'', RecipeViewSet, basename='recipes')
 recipe_router.register(r'(?P<id>[\d]+)/favorite', FavoriteRecipeViewSet)
 
 urlpatterns = [

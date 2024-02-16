@@ -29,11 +29,11 @@ class Base64ImageField(serializers.ImageField):
 
 class RecipeSerializer(serializers.ModelSerializer):
     image = Base64ImageField()
+    author = CustomUserSerializer(read_only=True)
     ingredients = IngredientRecipeSerializer(
         many=True, read_only=True, source='ingredient')
     tags = TagSerializer(
         many=True, read_only=True)
-    author = CustomUserSerializer(read_only=True)
     is_in_shopping_cart = serializers.SerializerMethodField()
     is_favorited = serializers.SerializerMethodField()
 
@@ -51,31 +51,22 @@ class RecipeSerializer(serializers.ModelSerializer):
             'text',
             'cooking_time',
         )
-        read_only_fields = ('author',)
 
     def get_is_in_shopping_cart(self, recipe: Recipe):
-        user = self.context['request'].user
-        if (user.is_authenticated and ShoppingCart.objects.filter(
-                shop_it=recipe, user=user).exists()):
-            return True
-        return False
+        return recipe.is_in_shopping_cart
 
     def get_is_favorited(self, recipe: Recipe):
-        user = self.context['request'].user
-        if (user.is_authenticated and FavoriteRecipe.objects.filter(
-                recipe=recipe, user=user).exists()):
-            return True
-        return False
+        return recipe.is_favorited
 
 
 class RecipeCreateSerializer(serializers.ModelSerializer):
     image = Base64ImageField()
     author = CustomUserSerializer(read_only=True)
+    ingredients = RecipeIngredientSerializer(many=True)
     tags = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(),
         many=True
     )
-    ingredients = RecipeIngredientSerializer(many=True)
     is_in_shopping_cart = serializers.SerializerMethodField()
     is_favorited = serializers.SerializerMethodField()
 
@@ -97,18 +88,14 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         check_list = 'ingredients', 'tags'
         for check in check_list:
-            try:
-                checked_field: list = attrs[check]
-            except KeyError:
-                raise serializers.ValidationError(
-                    f'{check}: Это поле обязательно должно быть.')
-            if len(checked_field) < 1:
+            checked_field: list = attrs.get(check)
+            if not checked_field:
                 raise serializers.ValidationError(
                     f'{check}: Это поле не может быть пустым.')
             if check == 'ingredients':
                 checked_field = [field['id'] for field in checked_field]
-            duplicates = find_duplicates(checked_field, check)
-            if len(duplicates) > 0:
+            duplicates = find_duplicates(checked_field)
+            if duplicates:
                 str_dups = [
                     f'{obj.name}(id:{str(obj.id)})' for obj in duplicates
                 ]
@@ -210,10 +197,8 @@ class SubscriptionsSerializer(serializers.ModelSerializer):
                   'is_subscribed', 'recipes', 'recipes_count')
 
     def get_is_subscribed(self, subs_obj):
-        # user = self.context['request'].user
-        # if user.is_authenticated:
-        #     return user.subscription.filter(author=subs_obj.author).exists()
-        return True
+        user = self.context['request'].user
+        return user.subscription.filter(author=subs_obj.pk).exists()
 
     def get_recipes_count(self, subs_obj: Subscriber):
         return subs_obj.author.recipes.count()

@@ -1,7 +1,6 @@
+from django.db.models import Sum
 from django.shortcuts import get_object_or_404, render
 
-from django_filters import AllValuesMultipleFilter
-from django_filters import rest_framework as filter
 from rest_framework import filters, mixins, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import LimitOffsetPagination
@@ -11,6 +10,7 @@ from rest_framework.views import APIView
 from api.permissions import AauthorOrReadOnly
 from api.serializers import IngredientSerializer, TagSerializer
 from api.utilities import get_object_or_validation_error
+from recipes.filters import RecipeFieldsFilter
 from recipes.models import (FavoriteRecipe, Ingredient, Recipe, ShoppingCart,
                             Tag)
 from recipes.serializers import (FavoriteRecipeSerializer,
@@ -41,7 +41,6 @@ class FavoriteRecipeViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin,
     доступно только добавление или удаление избранных рецептов,
     id рецепта извлекается из URL."""
 
-    http_method_names = 'post', 'delete'
     permission_classes = [permissions.IsAuthenticated]
     queryset = FavoriteRecipe.objects.all()
     serializer_class = FavoriteRecipeSerializer
@@ -49,46 +48,27 @@ class FavoriteRecipeViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin,
 
     @action(detail=False, methods=['delete'])
     def delete(self, request, id):
-        """Валидируется наличие рецепта,
-        а также наличие его в списке избранных.
-        """
+        """Сначала валидируется наличие рецепта,
+        а также наличие его в списке избранных,
+        затем запись удаляется."""
         recipe = get_object_or_404(Recipe, pk=id)
         delete_record = FavoriteRecipe.objects.filter(
-            user=request.user, recipe=recipe)
-        if len(delete_record):
-            delete_record.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(data={
-            "error_recipe": 'Такой записи нет в избранном.'},
-            status=status.HTTP_400_BAD_REQUEST)
-
-
-class RecipeFieldsFilter(filter.FilterSet):
-    """Класс RecipeFieldsFilter используется для добавления возможности
-    добавлять к запросам параметры фильтрации и поиска."""
-
-    tags = AllValuesMultipleFilter(field_name='tags__slug')
-    ingredient = AllValuesMultipleFilter(field_name='ingredients__name')
-
-    class Meta:
-        model = Recipe
-        fields = ('author', 'tags', 'cooking_time', 'ingredient')
-
-    def filter_queryset(self, queryset):
-        if self.request.user.is_anonymous:
-            return super().filter_queryset(queryset)
-        if self.request.query_params.get('is_favorited', '0') == '1':
-            queryset = queryset.filter(favored__user=self.request.user)
-        if self.request.query_params.get('is_in_shopping_cart', '0') == '1':
-            queryset = queryset.filter(shoppers__user=self.request.user)
-        return super().filter_queryset(queryset)
+            user=request.user, recipe=recipe).first()
+        if delete_record is None:
+            return Response(data={
+                "error_recipe": 'Такой записи нет в избранном.'},
+                status=status.HTTP_400_BAD_REQUEST)
+        delete_record.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-    queryset = Recipe.objects.all()
     pagination_class = LimitOffsetPagination
     filterset_class = RecipeFieldsFilter
+
+    def get_queryset(self):
+        return Recipe.all_related_fields.with_annotate(self.request.user.pk)
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -113,53 +93,34 @@ class APIRecipeCard(APIView):
     Используются константы для получения ингредиентов из рецептов в корзине.
     """
 
-    ID = 'ingredient__ingredient__id'
-    NAME = 'ingredient__ingredient__name'
-    MEASURE = 'ingredient__ingredient__measurement_unit'
-    AMOUNT = 'ingredient__amount'
-
-    http_method_names = ['get', 'post', 'delete']
+    permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        if request._user.is_authenticated:
-            ingredients_list = Recipe.objects.values(
-                self.ID, self.NAME, self.MEASURE, self.AMOUNT).filter(
-                shoppers__user=request.user
-            )
-            shopping_cart = self.summ_amount(ingredients_list)
-            return Response(shopping_cart, status=status.HTTP_200_OK)
-        return Response(status=status.HTTP_401_UNAUTHORIZED)
-
-    def summ_amount(self, obj_dict):
-        summ_list = {}
-        for obj in obj_dict:
-            if obj[self.ID] not in summ_list:
-                summ_list[obj[self.ID]] = obj
-            else:
-                summ_list[obj[self.ID]][self.AMOUNT] += obj[self.AMOUNT]
-
-        cart = [{row[self.NAME]: (row[self.AMOUNT], row[self.MEASURE])}
-                for row in summ_list.values()]
-        return {'Список необходимых ингредиентов': cart}
+        ingredients = Ingredient.objects.filter(
+            recipes__recipe__shoppers__user=request.user).annotate(
+            total_amount=Sum('recipes__amount')
+        )
+        shopping_cart = [
+            {ingredient.name: (
+                ingredient.total_amount,
+                ingredient.measurement_unit
+            )} for ingredient in ingredients
+        ]
+        return Response(shopping_cart, status=status.HTTP_200_OK)
 
     def post(self, request, id):
-        if request._user.is_anonymous:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
         recipe = get_object_or_validation_error(
             Recipe, id, 'Неверный ID рецепта.')
         request.data['user'] = request.user.id
         request.data['shop_it'] = recipe.id
         serializer = ShoppingCartSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            recipe_serializer = RecipeSubscriptionSerializer(recipe)
-            return Response(
-                recipe_serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        recipe_serializer = RecipeSubscriptionSerializer(recipe)
+        return Response(recipe_serializer.data,
+                        status=status.HTTP_201_CREATED)
 
     def delete(self, request, id):
-        if request._user.is_anonymous:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
         recipe = get_object_or_404(Recipe, pk=id)
         delete_record = ShoppingCart.objects.filter(
             user=request.user, shop_it=recipe)
