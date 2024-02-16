@@ -20,8 +20,7 @@ class CustomUserViewSet(UserViewSet):
         return super().get_permissions()
 
 
-class SubscriberViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin,
-                        viewsets.GenericViewSet):
+class SubscriberViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     """Класс SubscriberViewSet ограничен двумя методами:
     доступно только добавление или удаление подписки на автора
     """

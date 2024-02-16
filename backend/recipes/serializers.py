@@ -52,10 +52,10 @@ class RecipeSerializer(serializers.ModelSerializer):
             'cooking_time',
         )
 
-    def get_is_in_shopping_cart(self, recipe: Recipe):
+    def get_is_in_shopping_cart(self, recipe):
         return recipe.is_in_shopping_cart
 
-    def get_is_favorited(self, recipe: Recipe):
+    def get_is_favorited(self, recipe):
         return recipe.is_favorited
 
 

@@ -9,7 +9,7 @@ class User(AbstractUser):
         'Адрес почты', max_length=144, blank=False, unique=True
     )
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username']
+    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
 
     class Meta:
         verbose_name = 'Пользователь'
