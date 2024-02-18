@@ -1,36 +1,40 @@
 version: '3.3'
 
 volumes:
+  pg_data:
   static:
-  venv:
   media:
 
 services:
 
+  db:
+    image: postgres:13
+    env_file: .env
+    volumes:
+      - pg_data:/var/lib/postgresql/data/
+
+  backend:
+    image: acunathink/foodgram_backend
+    env_file: .env
+    volumes:
+      - static:/backend/
+      - media:/app/media/
+    depends_on:
+      - db
+
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+    env_file: .env
+    image: acunathink/foodgram_frontend
     volumes:
       - ./frontend/:/app/result_build/
 
   nginx:
-    image: nginx:1.19.3
+    image: acunathink/foodgram_gateway
+    env_file: .env
     ports:
-      - "80:80"
+      - 8000:80
     volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf
       - ./frontend/build:/usr/share/nginx/html/
       - ./docs/:/usr/share/nginx/html/api/docs/
       - static:/backend/
       - media:/media/
-
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    env_file: .env
-    volumes:
-      - static:/backend/
-      - venv:/usr/
-      - media:/app/media/

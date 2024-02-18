@@ -1,4 +1,5 @@
-# praktikum_new_diplom
+# [praktikum_new_diplom](https://acunasfoodgram.hopto.org)
+
 
 ## Описание
 Проект «Фудграм» — сайт, на котором пользователи могут публиковать рецепты, добавлять чужие рецепты в избранное и подписываться на публикации других авторов. Пользователям сайта также доступен сервис «Список покупок». Он позволяет создавать список продуктов, которые нужно купить для приготовления выбранных блюд сохраняя его в формате json, и может использоваться сторонними сервисами или приложениями.
@@ -29,16 +30,16 @@ cd foodgram-project-react
 
 - В корневой папке проекта (по умолчанию - `foodgram-project-react`) выполните:
 ```
-docker compose -f docker-compose.production.yml up
+docker compose up
 ```
 - при отсутствии ошибок можно остановить работу через ^C и запустить в фоновом режиме,
   используя флаг -d:
 ```
-docker compose -f docker-compose.production.yml up -d
+docker compose up -d
 ```
 
 - после чего можно создать суперюзера для доступа к адимин-зоне сайта, выполнив
 ```
-docker compose -f docker-compose.production.yml exec -it backend python manage.py createsuperuser
+docker compose exec -it backend python manage.py createsuperuser
 ```
 проверьте, пройдя на  http://localhost:8000/admin/
