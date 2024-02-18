@@ -10,16 +10,20 @@ class RecipeFieldsFilter(filter.FilterSet):
 
     tags = AllValuesMultipleFilter(field_name='tags__slug')
     ingredient = AllValuesMultipleFilter(field_name='ingredients__name')
+    is_favorited = filter.BooleanFilter(method='filter_is_favorited')
+    is_in_shopping_cart = filter.BooleanFilter(method='filter_is_in_cart')
 
     class Meta:
         model = Recipe
-        fields = ('author', 'tags', 'cooking_time', 'ingredient')
+        fields = ('author', 'tags', 'cooking_time', 'ingredient',
+                  'is_favorited', 'is_in_shopping_cart')
 
-    def filter_queryset(self, queryset):
-        if self.request.user.is_anonymous:
-            return super().filter_queryset(queryset)
-        if self.request.query_params.get('is_favorited', '0') == '1':
-            queryset = queryset.filter(favored__user=self.request.user)
-        if self.request.query_params.get('is_in_shopping_cart', '0') == '1':
-            queryset = queryset.filter(shoppers__user=self.request.user)
-        return super().filter_queryset(queryset)
+    def filter_is_favorited(self, queryset, _, value):
+        if not value:
+            return queryset
+        return queryset.filter(is_favorited=True)
+
+    def filter_is_in_cart(self, queryset, _, value):
+        if not value:
+            return queryset
+        return queryset.filter(is_in_shopping_cart=True)

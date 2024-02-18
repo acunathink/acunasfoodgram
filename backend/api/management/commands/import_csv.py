@@ -1,6 +1,7 @@
 import csv
 
 from django.core.management.base import BaseCommand
+from django.db.utils import IntegrityError
 
 from recipes.models import Ingredient, Tag
 
@@ -42,9 +43,14 @@ class Command(BaseCommand):
                 count += len(created_objects)
         with open(f'{csv_path}/{CSV[Tag]}', encoding='utf-8') as file:
             reader = csv.DictReader(file)
-            for row in reader:
-                Tag.objects.get_or_create(
-                    name=row['name'], color=row['color'], slug=row['slug'])
-                count += 1
-
+            try:
+                for row in reader:
+                    Tag.objects.get_or_create(
+                        name=row['name'], color=row['color'], slug=row['slug'])
+                    count += 1
+            except IntegrityError:
+                self.stdout.write(self.style.WARNING(
+                    f'Для модели "{Tag._meta.verbose_name}" '
+                    f'данные уже добавлены!')
+                )
         self.stdout.write(self.style.SUCCESS(f'Добавлено записей - {count}'))

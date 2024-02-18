@@ -123,13 +123,13 @@ class APIRecipeCard(APIView):
     def delete(self, request, id):
         recipe = get_object_or_404(Recipe, pk=id)
         delete_record = ShoppingCart.objects.filter(
-            user=request.user, shop_it=recipe)
-        if len(delete_record):
-            delete_record.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(data={
-            "error_recipe": 'Такой записи в корзине нет.'},
-            status=status.HTTP_400_BAD_REQUEST)
+            user=request.user, shop_it=recipe).first()
+        if not delete_record:
+            return Response(data={
+                "error_recipe": 'Такой записи в корзине нет.'},
+                status=status.HTTP_400_BAD_REQUEST)
+        delete_record.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 def page_not_found(request, exception):
