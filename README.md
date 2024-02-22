@@ -1,4 +1,4 @@
-# [praktikum_new_diplom](https://acunasfoodgram.hopto.org)
+# [acunasfoodgram](https://acunasfoodgram.hopto.org)
 
 
 ## Описание
@@ -11,9 +11,9 @@
 
 - Клонируйте репозиторий и перейдите в него в командной строке:
 ```
-git clone git@github.com:acunathink/foodgram-project-react.git
+git clone https://github.com/acunathink/acunasfoodgram.git
 
-cd foodgram-project-react
+cd acunasfoodgram/
 ```
 
 - Создайте файл `.env` на основе `.env.examlpe`:
@@ -28,7 +28,7 @@ cd foodgram-project-react
 
 ### Запуск проекта
 
-- В корневой папке проекта (по умолчанию - `foodgram-project-react`) выполните:
+- В корневой папке проекта (по умолчанию - `acunasfoodgram`) выполните:
 ```
 docker compose up
 ```
